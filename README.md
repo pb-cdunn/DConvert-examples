@@ -26,17 +26,19 @@ Also contains the code to trim reads and overlaps, based on the pattern of overl
 # Basic flow
 ## daligner
 - Jim -> cx.fasta (malformed for daligner)
-  relabel -> corrected.fasta
+  relabel_fasta -> corrected.fasta
   fasta2DB -> corrected.db (a dazzler DB file)
-  daligner (with HPCdaligner.c (in DALIGN repo?) + run_dalign.py) -> merged.las (happens to be sorted; comes from a bunch of intermed. files)
+  daligner (with HPCdaligner (in DALIGN repo?) + run_dalign.py) -> merged.las (happens to be sorted; comes from a bunch of intermed. files)
     [DALIGN is VERY TIME-CONSUMING!]
-  trimming -> trimmed_reads.pb (protobuf haha!; kinda internal to trimming) + merged.ovb (for Celera)
+  trimming (DCONVERT/PB) -> trimmed_reads.pb (protobuf haha!; kinda internal to trimming) + merged.ovb (for Celera)
 (Note: HPCdaligner.c should be modifed not to write to CWD, maybe, says Marcus. It writes to paths that
  might not work well for dist. jobs.)
+-> merged.ovb
   overlap_store (CA) -> overlapStore
--> corrected.fasta
-  fake_fastq.py (plus corrected.frg) -> corrected.fastq
-  gatekeeper (CA) (plus corrected.frg) -> gkpstore (dir of binary-encoded reads; see also next section)
+
+-> corrected.fasta, corrected.frg (which came from a previous run of Celera perl)
+  fake_fastq.py -> corrected.fastq
+  gatekeeper (CA) (plus corrected.frg again) -> gkpstore (dir of binary-encoded reads; see also next section)
 Note: Celera tends to store everything as bitfields, dependent on compiler flags.
 Note: Celera likes to modify in-place.
 
@@ -44,8 +46,8 @@ Note: Celera likes to modify in-place.
   apply_trimming_to_gkp -> gkpstore (modifies existing version)
 
 -> overlapStore + gkpStore
-  bogart (CA) -> tigStore
-  pbutgcns (PB) -> draft_assembly.fasta
+  bogart (CA) -> tigStore (unitigs, but basically contigs)
+  pbutgcns (PB) (maybe plus gkpStore) -> draft_assembly.fasta
 
 ## 
 
