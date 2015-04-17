@@ -108,3 +108,4 @@ clean:
 	rm -f $(OLAP_ERATES)* $(FRG_CORR)*
 	rm -f best.*
 	rm -f ovlstore_update
+	rm -rf daligner_cmds.txt dalign_cmds/
