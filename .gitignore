@@ -1,2 +1,6 @@
 /input/
 /corrected.fasta
+.corrected.bps
+.corrected.idx
+corrected.db
+

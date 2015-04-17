@@ -1,6 +1,7 @@
 SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
 CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
+DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
 DALIGN_DIR=/home/UNIXHOME/mkinsella/github_repos/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
 
@@ -84,7 +85,7 @@ $(TIG_LIST): $(OVERLAPSTORE)
 
 $(DRAFT_ASSEMBLY): $(TIG_LIST)
 	mkdir -p utgtmp
-	tmp=$$PWD/utgtmp gkp=$$PWD/$(GKPSTORE) tig=$$PWD/$(TIGSTORE) utg=$$PWD/$(TIG_LIST) cns=$$PWD/$(DRAFT_ASSEMBLY) nproc=6 \
+	${SMRTWRAP} tmp=$$PWD/utgtmp gkp=$$PWD/$(GKPSTORE) tig=$$PWD/$(TIGSTORE) utg=$$PWD/$(TIG_LIST) cns=$$PWD/$(DRAFT_ASSEMBLY) nproc=6 \
 		tsadapt=$$PWD/tigStore-adapter.py ./pbutgcns_wf.sh
 
 mummer: $(DRAFT_ASSEMBLY)
