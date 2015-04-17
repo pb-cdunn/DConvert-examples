@@ -49,7 +49,10 @@ Note: Celera likes to modify in-place.
   bogart (CA) -> tigStore (unitigs, but basically contigs)
   pbutgcns (PB) (maybe plus gkpStore) -> draft_assembly.fasta
 
-## 
+# alt path
+- frg
+- olap_erates
+
 
 # Dependencies
 ## Python
