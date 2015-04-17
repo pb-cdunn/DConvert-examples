@@ -6,7 +6,8 @@ writer = FastaIO.FastaWriter(sys.stdout)
 
 for record in reader:
     seq_length = len(record.sequence) 
-    zmw, bounds = record.header.split('/')
+    zmw = record.header.split('/')[1]
+    bounds = record.header.split('/')[-1]
     start, end = [int(k) for k in bounds.split('_')]
     new_end = start + seq_length
 

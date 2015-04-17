@@ -1,7 +1,8 @@
+SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
 CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
 DALIGN_DIR=/home/UNIXHOME/mkinsella/github_repos/DALIGNER
-DCONVERT_DIR=/home/UNIXHOME/mkinsella/github_repos/DConvert
+DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
 
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
 
@@ -90,6 +91,8 @@ mummer: $(DRAFT_ASSEMBLY)
 	~/MUMmer3.23/nucmer --maxgap=500 --mincluster=100 --prefix=ref_asm /lustre/hpcprod/jdrake/arab/test/eval/GCA_000835945.1_ASM83594v1_genomic.fna $<
 	~/MUMmer3.23/show-coords -r ref_asm.delta -L 10000
 
+corrected.fasta: cx.fasta
+	${SMRTWRAP} python relabel_fasta.py cx.fasta >| corrected.fasta
 .PHONY: clean
 
 clean:
