@@ -75,3 +75,33 @@ GNU module
   QUALITY (PHRED encoded; same length as sequence)
 ```
 
+## corrected reads -> contigs
+Old:
+1. kmer counting
+2. overlap
+3. chimera detection
+4. overlap
+5. correction
+6. layout/unitigging (bogart)
+7. consensus (pbutgcns)
+
+New:
+1. daligner to overlap
+2. chimera trimming
+3a. correction?
+3b. bogart
+4. pbutgcns
+
+Steps:
+- PreAssembly (pbdagcon)
+  - Input: raw reads
+  - Output: corrected reads
+  - Obj: Reduce error rate from 15% to 6%
+- Assembly (Celera Assembler)
+  - Input: corrected reads
+  - Output: draft assembly
+  - Obj: recreate the genome from which the reads were sampled
+- Polishing
+  - Input: Raw reads; Draft assembly
+  - Output: Polished assembly
+
