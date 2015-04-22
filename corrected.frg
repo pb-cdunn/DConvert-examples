@@ -30,7 +30,7 @@ forceShortReadFormat=0
 constantInsertSize=0
 fastqQualityValues=sanger
 fastqOrientation=innie
-fastqReads=/lustre/hpcprod/cdunn/data/ecoli/corrected.fastq
+fastqReads=/lustre/hpcprod/cdunn/repo/arab2/corrected.fastq
 .
 }
 {VER
