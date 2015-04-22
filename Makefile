@@ -4,6 +4,8 @@ DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
 DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
 DALIGN_DIR=/lustre/hpcprod/cdunn/repo/gh/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/UNIXHOME/mkinsella/local/lib
+export LD_LIBRARY_PATH
 
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
 
@@ -44,7 +46,8 @@ $(MERGED_LAS): corrected.1.las
 	echo rm corrected.*.las
 
 $(TRIMMED_READS_PB): $(MERGED_LAS) 
-	${SMRTWRAP} $(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | ${SMRTWRAP} $(DCONVERT_DIR)/trim_reads --min_spanned_coverage 1 --overlaps - > $@ 2> read_trimming.log
+	env | sort
+	$(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | $(DCONVERT_DIR)/trim_reads --min_spanned_coverage 1 --overlaps - > $@
 	$(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | $(DCONVERT_DIR)/trim_overlaps --overlaps - --trimmed_reads $@  2> overlap_trimming.log | $(DCONVERT_DIR)/write_to_ovb --style ovl > $(MERGED_OVB) 2> write_ovb.log
 
 $(CORRECTED_FASTQ): $(CORRECTED_FASTA)
@@ -87,7 +90,7 @@ $(TIG_LIST): $(OVERLAPSTORE)
 
 $(DRAFT_ASSEMBLY): $(TIG_LIST)
 	mkdir -p utgtmp
-	${SMRTWRAP} tmp=$$PWD/utgtmp gkp=$$PWD/$(GKPSTORE) tig=$$PWD/$(TIGSTORE) utg=$$PWD/$(TIG_LIST) cns=$$PWD/$(DRAFT_ASSEMBLY) nproc=6 \
+	tmp=$$PWD/utgtmp gkp=$$PWD/$(GKPSTORE) tig=$$PWD/$(TIGSTORE) utg=$$PWD/$(TIG_LIST) cns=$$PWD/$(DRAFT_ASSEMBLY) nproc=6 \
 		tsadapt=$$PWD/tigStore-adapter.py ./pbutgcns_wf.sh
 
 mummer: $(DRAFT_ASSEMBLY)
@@ -95,7 +98,7 @@ mummer: $(DRAFT_ASSEMBLY)
 	~/MUMmer3.23/show-coords -r ref_asm.delta -L 10000
 
 corrected.fasta: cx.fasta
-	${SMRTWRAP} python relabel_fasta.py cx.fasta >| corrected.fasta
+	python relabel_fasta.py cx.fasta >| corrected.fasta
 .PHONY: clean
 
 clean:
