@@ -2,7 +2,7 @@ SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
 CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
 DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
-DALIGN_DIR=/home/UNIXHOME/mkinsella/github_repos/DALIGNER
+DALIGN_DIR=/lustre/hpcprod/cdunn/repo/gh/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
 
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
@@ -33,16 +33,18 @@ $(DAZZ_DBFILE): $(CORRECTED_FASTA)
 	$(DAZZ_DIR)/fasta2DB $@ $<
 	$(DAZZ_DIR)/DBsplit -a $@
 
-$(MERGED_LAS): $(DAZZ_DBFILE)
+#$(MERGED_LAS): $(DAZZ_DBFILE)
+corrected.1.las: $(DAZZ_DBFILE)
 	$(DALIGN_DIR)/HPCdaligner $(DALIGNER_OPTS) $< > daligner_cmds.txt	
 	mkdir -p dalign_cmds
 	for i in $$(seq 1 `wc -l < daligner_cmds.txt`) ; do sed -n "$$i p" daligner_cmds.txt > dalign_cmds/dalign.$$i.sh ; done
 	python ./run_dalign.py dalign_cmds
-	$(DALIGN_DIR)/LAmerge $@ corrected.?.las corrected.??.las
-	rm corrected.*.las
+$(MERGED_LAS): corrected.1.las
+	$(DALIGN_DIR)/LAmerge $@ corrected.1.las
+	echo rm corrected.*.las
 
 $(TRIMMED_READS_PB): $(MERGED_LAS) 
-	$(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | $(DCONVERT_DIR)/trim_reads --min_spanned_coverage 1 --overlaps - > $@ 2> read_trimming.log
+	${SMRTWRAP} $(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | ${SMRTWRAP} $(DCONVERT_DIR)/trim_reads --min_spanned_coverage 1 --overlaps - > $@ 2> read_trimming.log
 	$(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | $(DCONVERT_DIR)/trim_overlaps --overlaps - --trimmed_reads $@  2> overlap_trimming.log | $(DCONVERT_DIR)/write_to_ovb --style ovl > $(MERGED_OVB) 2> write_ovb.log
 
 $(CORRECTED_FASTQ): $(CORRECTED_FASTA)
