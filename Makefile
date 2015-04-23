@@ -1,11 +1,13 @@
+WML:=./wrap-module-load.sh
+MP:=/lustre/hpcprod/cdunn/modulefiles
+MK:=mkinsella
+SMRT:=smrtanalysis/2.3.0.p2
 SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
 CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
 DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
 DALIGN_DIR=/lustre/hpcprod/cdunn/repo/gh/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
-LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/UNIXHOME/mkinsella/local/lib
-export LD_LIBRARY_PATH
 
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
 
