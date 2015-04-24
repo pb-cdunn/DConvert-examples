@@ -11,10 +11,12 @@ DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
 DALIGN_DIR=/lustre/hpcprod/cdunn/repo/gh/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
 
-READ_FROM_LAS:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/read_from_las
-TRIM_READS   :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_reads
-TRIM_OVERLAPS:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_overlaps
-WRITE_TO_OVB :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/write_to_ovb
+READ_FROM_LAS        :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/read_from_las
+TRIM_READS           :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_reads
+TRIM_OVERLAPS        :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_overlaps
+WRITE_TO_OVB         :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/write_to_ovb
+APPLY_TRIMMING_TO_GKP:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/apply_trimming_to_gkp
+GATEKEEPER           :=${CELERA_DIR}/gatekeeper
 
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
 
@@ -63,8 +65,8 @@ $(CORRECTED_FASTQ): $(CORRECTED_FASTA)
 	${WML} -m ${SMRT} python ./fake_fastq.py $< $@
 
 $(GKPSTORE): $(CORRECTED_FRG) $(CORRECTED_FASTQ) $(TRIMMED_READS_PB)
-	$(CELERA_DIR)/gatekeeper -o $(GKPSTORE) -T -F $<
-	$(DCONVERT_DIR)/apply_trimming_to_gkp --gkp $(GKPSTORE) --trimmed_reads $(TRIMMED_READS_PB)
+	${GATEKEEPER} -o $(GKPSTORE) -T -F $<
+	${APPLY_TRIMMING_TO_GKP} --gkp $(GKPSTORE) --trimmed_reads $(TRIMMED_READS_PB)
 
 $(OVERLAPSTORE): $(TRIMMED_READS_PB) $(GKPSTORE)
 	ls $(MERGED_OVB) > ovl.list
