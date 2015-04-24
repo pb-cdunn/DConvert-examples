@@ -58,6 +58,11 @@ then
 	module load $modules
 fi
 
+if [ $verbose -ne 0 ]
+then
+	module display $modules
+fi
+
 Echo "$@"
 if [ $dry_run -eq 0 ]
 then

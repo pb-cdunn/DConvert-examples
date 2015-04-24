@@ -2,12 +2,19 @@ WML:=./wrap-module-load.sh
 MP:=/lustre/hpcprod/cdunn/modulefiles
 MK:=mkinsella
 SMRT:=smrtanalysis/2.3.0.p2
+SMRT:=smrtanalysis/2.3.0.nightly
+SMRT:=smrtanalysis/mainline
 SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
 CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
 DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
 DALIGN_DIR=/lustre/hpcprod/cdunn/repo/gh/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
+
+READ_FROM_LAS:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/read_from_las
+TRIM_READS   :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_reads
+TRIM_OVERLAPS:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_overlaps
+WRITE_TO_OVB :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/write_to_ovb
 
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
 
@@ -49,8 +56,8 @@ $(MERGED_LAS): corrected.1.las
 
 $(TRIMMED_READS_PB): $(MERGED_LAS) 
 	env | sort
-	$(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | $(DCONVERT_DIR)/trim_reads --min_spanned_coverage 1 --overlaps - > $@
-	$(DCONVERT_DIR)/read_from_las --las $< --db $(DAZZ_DBFILE) | $(DCONVERT_DIR)/trim_overlaps --overlaps - --trimmed_reads $@  2> overlap_trimming.log | $(DCONVERT_DIR)/write_to_ovb --style ovl > $(MERGED_OVB) 2> write_ovb.log
+	${READ_FROM_LAS} --las $< --db $(DAZZ_DBFILE) | ${TRIM_READS} --min_spanned_coverage 1 --overlaps - > $@
+	${READ_FROM_LAS} --las $< --db $(DAZZ_DBFILE) | ${TRIM_OVERLAPS} --overlaps - --trimmed_reads $@  2> overlap_trimming.log | ${WRITE_TO_OVB} --style ovl > $(MERGED_OVB) 2> write_ovb.log
 
 $(CORRECTED_FASTQ): $(CORRECTED_FASTA)
 	python ./fake_fastq.py $< > $@
