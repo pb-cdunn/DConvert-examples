@@ -18,6 +18,9 @@ WRITE_TO_OVB         :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/write_to_ovb
 APPLY_TRIMMING_TO_GKP:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/apply_trimming_to_gkp
 GATEKEEPER           :=${CELERA_DIR}/gatekeeper
 
+# This needs stuff for tigStore-adapter.py, which it calls.
+PBUTGCNS_WF          :=${WML} -m ${SMRT} ./pbutgcns_wf.sh
+
 DALIGNER_OPTS=-k25 -w5 -h60 -e.95 -s500 -M28 -t12
 
 CORRECTED_FASTA=corrected.fasta
@@ -102,7 +105,7 @@ $(TIG_LIST): $(OVERLAPSTORE)
 $(DRAFT_ASSEMBLY): $(TIG_LIST)
 	mkdir -p utgtmp
 	tmp=$$PWD/utgtmp gkp=$$PWD/$(GKPSTORE) tig=$$PWD/$(TIGSTORE) utg=$$PWD/$(TIG_LIST) cns=$$PWD/$(DRAFT_ASSEMBLY) nproc=6 \
-		tsadapt=$$PWD/tigStore-adapter.py ./pbutgcns_wf.sh
+		tsadapt=$$PWD/tigStore-adapter.py ${PBUTGCNS_WF}
 
 mummer: $(DRAFT_ASSEMBLY)
 	~/MUMmer3.23/nucmer --maxgap=500 --mincluster=100 --prefix=ref_asm /lustre/hpcprod/jdrake/arab/test/eval/GCA_000835945.1_ASM83594v1_genomic.fna $<

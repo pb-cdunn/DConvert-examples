@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os
 import sys
 import subprocess
@@ -7,10 +6,6 @@ import shlex
 import string
 from pbcore.io import FastaIO
 from multiprocessing import Pool
-
-gkp_store = sys.argv[1]
-tig_store = sys.argv[2]
-utgid = int(sys.argv[3])
 
 rc = string.maketrans('actgACTG', 'tgacTGAC')
 
@@ -22,8 +17,7 @@ class FragRec(object):
         self.end = int(max(start, end))
         self.rev = start - end > 0
 
-
-def process_unitig(unitig_id):
+def process_unitig(gkp_store, tig_store, unitig_id):
 
     # more self-descriptive id
     utgid = "unitig_%d" % unitig_id
@@ -36,8 +30,8 @@ def process_unitig(unitig_id):
     out = out.split("\n")
 
     # save fragment ids to a file
-    idfh = open("%s.frgids" % utgid, "w")
-    for frag in out:
+    with open(get_frgids_fname(utgid), "w") as idfh:
+      for frag in out:
         """FRG 1453 179419,182165"""
         frag = frag.strip()
         if len(frag) == 0:
@@ -49,8 +43,6 @@ def process_unitig(unitig_id):
 
         frags.append(FragRec(frag_id, int(frag[2]), int(frag[3])))
         max_coor = max(int(frag[2]), int(frag[3]), max_coor)
-
-    idfh.close()
 
     # get the fragment sequences
     gkcall = "gatekeeper -dumpfasta %s_frgs -iid %s.frgids %s"
@@ -82,7 +74,7 @@ def process_unitig(unitig_id):
     utgseq = "".join(seq_array)
 
     # create a simple 'layout' file for consumption by pbutgcns
-    with open('%s.lay' % utgid, 'w') as fh:
+    with open(get_lay_fname(utgid), 'w') as fh:
         # first line is the initial consensus
         fh.write("%s %s\n" % (utgid, utgseq))
         # the rest are the fragments and their offsets
@@ -93,7 +85,21 @@ def process_unitig(unitig_id):
 
             fh.write('%d %d %d %s\n' % (f.frgid, f.start, f.end, qseq))
 
-process_unitig(utgid)
+# a couple of output files
+def get_lay_fname(utgid):
+    return '%s.lay' % utgid
+def get_frgids_fname(utgid):
+    return "%s.frgids" % utgid
+
+if __name__ == '__main__':
+    gkp_store, tig_store, utgid_name = sys.argv[1:4]
+    try:
+        process_unitig(gkp_store, tig_store, int(utgid_name))
+    except:
+        # clean up (for make)
+        ofile.close()
+        os.unlink(oname)
+        raise
 
 """
 args = shlex.split("tigStore -g %s -t %s 1 -D unitiglist"
