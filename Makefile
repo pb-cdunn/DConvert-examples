@@ -60,7 +60,7 @@ $(TRIMMED_READS_PB): $(MERGED_LAS)
 	${READ_FROM_LAS} --las $< --db $(DAZZ_DBFILE) | ${TRIM_OVERLAPS} --overlaps - --trimmed_reads $@  2> overlap_trimming.log | ${WRITE_TO_OVB} --style ovl > $(MERGED_OVB) 2> write_ovb.log
 
 $(CORRECTED_FASTQ): $(CORRECTED_FASTA)
-	python ./fake_fastq.py $< > $@
+	${WML} -m ${SMRT} python ./fake_fastq.py $< $@
 
 $(GKPSTORE): $(CORRECTED_FRG) $(CORRECTED_FASTQ) $(TRIMMED_READS_PB)
 	$(CELERA_DIR)/gatekeeper -o $(GKPSTORE) -T -F $<
@@ -107,7 +107,8 @@ mummer: $(DRAFT_ASSEMBLY)
 	~/MUMmer3.23/show-coords -r ref_asm.delta -L 10000
 
 corrected.fasta: cx.fasta
-	python relabel_fasta.py cx.fasta >| corrected.fasta
+	${WML} -m ${SMRT} python ./relabel_fasta.py $< $@
+
 .PHONY: clean
 
 clean:
