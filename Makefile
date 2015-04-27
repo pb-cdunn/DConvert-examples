@@ -4,6 +4,7 @@ MK:=mkinsella
 SMRT:=smrtanalysis/2.3.0.p2
 SMRT:=smrtanalysis/2.3.0.nightly
 SMRT:=smrtanalysis/mainline
+CURRENT:=/mnt/secondary-siv/nightlytest/Ubuntu1404_Mainline_SGE_Install/smrtanalysis_148910/install/smrtanalysis_2.4.0.148910
 SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
 CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
@@ -41,30 +42,30 @@ TIG_LIST=tigs.lst
 DRAFT_ASSEMBLY=draft_assembly.fasta
 
 # This gets the number of reads in the gkpstore
-GKPFRAGS=$(CELERA_DIR)/gatekeeper -lastfragiid
+GKPFRAGS=${GATEKEEPER} -lastfragiid
 
-all: $(DRAFT_ASSEMBLY)
+all: ${DRAFT_ASSEMBLY}
 
-$(DAZZ_DBFILE): $(CORRECTED_FASTA)
-	$(DAZZ_DIR)/fasta2DB $@ $<
-	$(DAZZ_DIR)/DBsplit -a $@
+${DAZZ_DBFILE}: ${CORRECTED_FASTA}
+	${DAZZ_DIR}/fasta2DB $@ $<
+	${DAZZ_DIR}/DBsplit -a $@
 
-#$(MERGED_LAS): $(DAZZ_DBFILE)
-corrected.1.las: $(DAZZ_DBFILE)
-	$(DALIGN_DIR)/HPCdaligner $(DALIGNER_OPTS) $< > daligner_cmds.txt	
+#${MERGED_LAS}: ${DAZZ_DBFILE}
+corrected.1.las: ${DAZZ_DBFILE}
+	${DALIGN_DIR}/HPCdaligner ${DALIGNER_OPTS} $< > daligner_cmds.txt	
 	mkdir -p dalign_cmds
 	for i in $$(seq 1 `wc -l < daligner_cmds.txt`) ; do sed -n "$$i p" daligner_cmds.txt > dalign_cmds/dalign.$$i.sh ; done
 	python ./run_dalign.py dalign_cmds
-$(MERGED_LAS): corrected.1.las
-	$(DALIGN_DIR)/LAmerge $@ corrected.1.las
+${MERGED_LAS}: corrected.1.las
+	${DALIGN_DIR}/LAmerge $@ corrected.1.las
 	echo rm corrected.*.las
 
-$(TRIMMED_READS_PB): $(MERGED_LAS) 
+${TRIMMED_READS_PB}: ${MERGED_LAS} 
 	env | sort
-	${READ_FROM_LAS} --las $< --db $(DAZZ_DBFILE) | ${TRIM_READS} --min_spanned_coverage 1 --overlaps - > $@
-	${READ_FROM_LAS} --las $< --db $(DAZZ_DBFILE) | ${TRIM_OVERLAPS} --overlaps - --trimmed_reads $@  2> overlap_trimming.log | ${WRITE_TO_OVB} --style ovl > $(MERGED_OVB) 2> write_ovb.log
+	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_READS} --min_spanned_coverage 1 --overlaps - > $@
+	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_OVERLAPS} --overlaps - --trimmed_reads $@  2> overlap_trimming.log | ${WRITE_TO_OVB} --style ovl > ${MERGED_OVB} 2> write_ovb.log
 
-$(CORRECTED_FASTQ): $(CORRECTED_FASTA)
+${CORRECTED_FASTQ}: ${CORRECTED_FASTA}
 	${WML} -m ${SMRT} python ./fake_fastq.py $< $@
 
 $(GKPSTORE): $(CORRECTED_FRG) $(CORRECTED_FASTQ) $(TRIMMED_READS_PB)
@@ -92,40 +93,50 @@ $(OLAP_ERATES): $(FRG_CORR)
 	ls $@_dir/*.WORKING > $@.list
 	$(CELERA_DIR)/cat-erates -L $@.list -o $@
 
-ovlstore_update: $(OLAP_ERATES)
-	$(CELERA_DIR)/overlapStore -u $(OVERLAPSTORE) $(OLAP_ERATES)
+ovlstore_update: ${OLAP_ERATES}
+	$(CELERA_DIR)/overlapStore -u ${OVERLAPSTORE} $<
 	touch ovlstore_update
 
-$(TIG_LIST): $(OVERLAPSTORE)
+${TIG_LIST}: ${OVERLAPSTORE}
 	mkdir -p bogart
-	$(CELERA_DIR)/bogart -O $(OVERLAPSTORE) -G $(GKPSTORE) -T $(TIGSTORE) -D intersections -B 75000 -eg 0.04 -Eg 4.0 -em 0.045 -Em 5.25 -o bogart/bogart
-	$(CELERA_DIR)/tigStore -g $(GKPSTORE) -t $(TIGSTORE) 1 -d properties -U | \
+	${CELERA_DIR}/bogart -O ${OVERLAPSTORE} -G ${GKPSTORE} -T ${TIGSTORE} -D intersections -B 75000 -eg 0.04 -Eg 4.0 -em 0.045 -Em 5.25 -o bogart/bogart
+	${CELERA_DIR}/tigStore -g ${GKPSTORE} -t ${TIGSTORE} 1 -d properties -U | \
 		awk 'BEGIN{t=0}$$1=="numFrags"{if($$2>1){print t, $$2}t++}' | sort -nrk2,2 > $@
 
-$(DRAFT_ASSEMBLY): $(TIG_LIST)
+${DRAFT_ASSEMBLY}: ${TIG_LIST}
 	mkdir -p utgtmp
-	tmp=$$PWD/utgtmp gkp=$$PWD/$(GKPSTORE) tig=$$PWD/$(TIGSTORE) utg=$$PWD/$(TIG_LIST) cns=$$PWD/$(DRAFT_ASSEMBLY) nproc=6 \
+	tmp=$$PWD/utgtmp gkp=$$PWD/${GKPSTORE} tig=$$PWD/${TIGSTORE} utg=$$PWD/${TIG_LIST} cns=$$PWD/${DRAFT_ASSEMBLY} nproc=6 \
 		tsadapt=$$PWD/tigStore-adapter.py ${PBUTGCNS_WF}
 
-mummer: $(DRAFT_ASSEMBLY)
-	~/MUMmer3.23/nucmer --maxgap=500 --mincluster=100 --prefix=ref_asm /lustre/hpcprod/jdrake/arab/test/eval/GCA_000835945.1_ASM83594v1_genomic.fna $<
-	~/MUMmer3.23/show-coords -r ref_asm.delta -L 10000
+REF:=/lustre/hpcprod/jdrake/arab/test/eval/GCA_000835945.1_ASM83594v1_genomic.fna
+REF:=/mnt/secondary-siv/references/ecoli_mutated/sequence/ecoli_mutated.fasta
+mummer: ${DRAFT_ASSEMBLY}
+	/home/${MK}/MUMmer3.23/nucmer --maxgap=500 --mincluster=100 --prefix=ref_asm ${REF} $<
+	/home/${MK}/MUMmer3.23/show-coords -r ref_asm.delta -L 10000
 
 corrected.fasta: cx.fasta
 	${WML} -m ${SMRT} python ./relabel_fasta.py $< $@
 
+ex.out: ${DRAFT_ASSEMBLY}
+	${WML} -m exonerate/2.0.0 fastalength $< > $@
+out.report: ${DRAFT_ASSEMBLY}
+	${WML} -m mummer/3.23 dnadiff ${REF} $<
+foo:
+	${WML} -m mummer/3.23 which dnadiff
+# See *.report
+
 .PHONY: clean
 
 clean:
-	rm -f $(CORRECTED_FASTA)
-	rm -f $(DAZZ_DBFILE)
-	rm -f .$(basename $(DAZZ_DBFILE))*
-	rm -f $(basename $(DAZZ_DBFILE)).*.las
-	rm -f obt_merged.las ovl_merged.las $(TRIMMED_READS_PB)
-	rm -f $(MERGED_LAS) $(MERGED_OVB) ovl.list
-	rm -rf $(GKPSTORE) $(OVERLAPSTORE) $(TIGSTORE) bogart
-	rm -f gkpstore* $(TIG_LIST)
-	rm -f $(OLAP_ERATES)* $(FRG_CORR)*
+	rm -f ${CORRECTED_FASTA}
+	rm -f ${DAZZ_DBFILE}
+	rm -f .${basename ${DAZZ_DBFILE}}*
+	rm -f ${basename ${DAZZ_DBFILE}}.*.las
+	rm -f obt_merged.las ovl_merged.las ${TRIMMED_READS_PB}
+	rm -f ${MERGED_LAS} ${MERGED_OVB} ovl.list
+	rm -rf ${GKPSTORE} ${OVERLAPSTORE} ${TIGSTORE} bogart
+	rm -f gkpstore* ${TIG_LIST}
+	rm -f ${OLAP_ERATES}* ${FRG_CORR}*
 	rm -f best.*
 	rm -f ovlstore_update
 	rm -rf daligner_cmds.txt dalign_cmds/
