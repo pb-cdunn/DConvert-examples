@@ -69,6 +69,7 @@ ${CORRECTED_FASTQ}: ${CORRECTED_FASTA}
 	${WML} -m ${SMRT} python ./fake_fastq.py $< $@
 
 $(GKPSTORE): $(CORRECTED_FRG) $(CORRECTED_FASTQ) $(TRIMMED_READS_PB)
+	# This will *not* modify an existing gkpstore.
 	${GATEKEEPER} -o $(GKPSTORE) -T -F $<
 	${APPLY_TRIMMING_TO_GKP} --gkp $(GKPSTORE) --trimmed_reads $(TRIMMED_READS_PB)
 
