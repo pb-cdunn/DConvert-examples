@@ -15,3 +15,5 @@
 /dalign_cmds/
 /daligner_cmds.txt
 
+*.bak
+/out.txt
