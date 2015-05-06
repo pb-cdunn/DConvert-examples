@@ -13,16 +13,17 @@ def qsub_run(cmd_file, nproc):
     cmd_i = base_cmd.split('.')[1]
     cmd_log = base_cmd.replace(".sh", ".log")
     
-    proc = subprocess.Popen(QSUB_TEMPLATE.format(sh=base_cmd, i=cmd_i,
-                                                 log=cmd_log, nproc=nproc), shell=True)
-    proc.communicate()
-
-    if(proc.returncode != 0):
+    qsub = QSUB_TEMPLATE.format(sh=base_cmd, i=cmd_i, log=cmd_log, nproc=nproc)
+    rc = run(qsub)
+    if rc:
         time.sleep(10)
-        proc = subprocess.Popen(QSUB_TEMPLATE.format(sh=base_cmd, i=cmd_i,
-                                                     log=cmd_log, nproc=nproc), shell=True)
-        proc.communicate()
+        run(qsub)
 
+def run(qsub):
+    sys.stderr.write("$ %s\n" %qsub)
+    proc = subprocess.Popen(qsub, shell=True)
+    proc.communicate()
+    return proc.returncode
 
 def main(cmd_dir):
     cmd_shs = [os.path.join(cmd_dir, k) for k in os.listdir(cmd_dir)]
