@@ -1,22 +1,24 @@
 WML:=./wrap-module-load.sh
 MP:=/lustre/hpcprod/cdunn/modulefiles
 MK:=mkinsella
+MK:=cdunn
 SMRT:=smrtanalysis/2.3.0.p2
 SMRT:=smrtanalysis/2.3.0.nightly
 SMRT:=smrtanalysis/mainline
 CURRENT:=/mnt/secondary-siv/nightlytest/Ubuntu1404_Mainline_SGE_Install/smrtanalysis_148910/install/smrtanalysis_2.4.0.148910
 SMRTWRAP:=../../mk/current/smrtcmds/bin/smrtwrap
-CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
+#CELERA_DIR=/home/UNIXHOME/mkinsella/builds/mainline_031615/analysis/bin/wgs-8.1/Linux-amd64/bin
+CELERA_DIR:=$(shell dirname $$(readlink -f $$(${WML} -m ${SMRT} which gatekeeper)))
 DAZZ_DIR=/home/UNIXHOME/mkinsella/github_repos/DAZZ_DB
 DAZZ_DIR=/lustre/hpcprod/cdunn/repo/gh/DAZZ_DB
 DALIGN_DIR=/lustre/hpcprod/cdunn/repo/gh/DALIGNER
 DCONVERT_DIR=/lustre/hpcprod/cdunn/repo/gh/DConvert
 
-READ_FROM_LAS        :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/read_from_las
-TRIM_READS           :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_reads
-TRIM_OVERLAPS        :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/trim_overlaps
-WRITE_TO_OVB         :=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/write_to_ovb
-APPLY_TRIMMING_TO_GKP:=${WML} -p ${MP} -m mkinsella ${DCONVERT_DIR}/apply_trimming_to_gkp
+READ_FROM_LAS        :=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/read_from_las
+TRIM_READS           :=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/trim_reads
+TRIM_OVERLAPS        :=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/trim_overlaps
+WRITE_TO_OVB         :=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/write_to_ovb
+APPLY_TRIMMING_TO_GKP:=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/apply_trimming_to_gkp
 GATEKEEPER           :=${CELERA_DIR}/gatekeeper
 
 # This needs stuff for tigStore-adapter.py, which it calls.
