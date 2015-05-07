@@ -5,6 +5,7 @@ import subprocess
 import sys
 import time
 
+REPEAT = False
 QSUB_TEMPLATE = ("qsub -S /bin/bash -sync y -V -q production -N dalign.{i} -o $PWD/dalign_cmds/{log} "
                  "-e $PWD/dalign_cmds/{log} -pe smp {nproc} "
                  "-wd $PWD dalign_cmds/{sh}")
@@ -16,7 +17,7 @@ def qsub_run(cmd_file, nproc):
     
     qsub = QSUB_TEMPLATE.format(sh=base_cmd, i=cmd_i, log=cmd_log, nproc=nproc)
     rc = run(qsub)
-    if rc:
+    if REPEAT and rc:
         time.sleep(10)
         run(qsub)
 
