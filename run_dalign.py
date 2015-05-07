@@ -8,7 +8,7 @@ import time
 QSUB_TEMPLATE = ("qsub -S /bin/bash -sync y -V -q production -N dalign.{i} -o $PWD/dalign_cmds/{log} "
                  "-e $PWD/dalign_cmds/{log} -pe smp {nproc} "
                  "-wd $PWD dalign_cmds/{sh}")
-QSUB_TEMPLATE = "bash dalign_cmds/{sh}"
+QSUB_TEMPLATE = "bash dalign_cmds/{sh} >| dalign_cmds/{log} 2>&1"
 def qsub_run(cmd_file, nproc):
     base_cmd = os.path.basename(cmd_file)
     cmd_i = base_cmd.split('.')[1]
