@@ -22,7 +22,7 @@ def WriteSplit(write, seq, split=60):
         slice = seq[nfull*split:]
         write(''.join(slice))
         write('\n')
-def synth(dna_len, ref_writer, writer):
+def synth(dna_len, ref_writer, writer, n_zmws=100):
     '''
     Writer FASTA files:
         ref_writer: reference (source DNA)
@@ -67,11 +67,10 @@ def synth(dna_len, ref_writer, writer):
     dna = DnaCreator().Create(dna_len)
     ref_writer.write(">rand%d\n" %dna_len)
     WriteSplit(ref_writer.write, dna)
-    n_zmws = 100
     loader = Loader(n_zmws)
     ringer = Ringer()
     reader = Reader()
-    avg_read_len = 100
+    avg_read_len = 1000
     total_read_len = 0
     for i, beg, end in loader.Load():
         writer.write(">m000_000/{0:d}/{1:d}_{2:d}\n".format(i, beg, end))
@@ -95,7 +94,7 @@ coverage={coverage:.1f}x
         
     #reader = PbReader(dna)
 def main():
-    with open('ref.fasta', 'w') as ref_writer, open('cx.fasta', 'w') as writer:
-        synth(1000, ref_writer, writer)
+    with open('cx.ref.fasta', 'w') as ref_writer, open('cx.fasta', 'w') as writer:
+        synth(4600000, ref_writer, writer, n_zmws=120000)
 if __name__ == "__main__":
     main()
