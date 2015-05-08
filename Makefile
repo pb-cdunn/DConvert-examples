@@ -1,4 +1,4 @@
-WML:=./wrap-module-load.sh
+WML:=./wrap-module-load-exec.sh
 MP:=/lustre/hpcprod/cdunn/modulefiles
 MK:=mkinsella
 MK:=cdunn
