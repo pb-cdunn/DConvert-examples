@@ -32,8 +32,8 @@ def synth(dna_len, ref_writer, writer, n_zmws=100):
         def Create(self, n):
             return [choice(DNA_BASES) for _ in range(n)]
     class Loader(object):
-        worst_len = 1
-        best_len = 10
+        worst_len = 1000
+        best_len = 15000
         def __init__(self, n_zmws):
             self.n_zmws = n_zmws
         def Load(self):
@@ -53,6 +53,15 @@ def synth(dna_len, ref_writer, writer, n_zmws=100):
             ring = dna[beg:end] + capA + list(complement(reversed(dna[beg:end]))) + capB
             return ring
     class Reader(object):
+        def Read(self, seq, upton):
+            '''No inserts or deletes yet.
+            '''
+            l = len(seq)
+            if upton >= l:  # == b/c randrange(0) fails
+                return seq
+            curr = random.randrange(l-upton)
+            return seq[curr:curr+upton]
+    class RingReader(object):
         def Read(self, ring, n):
             '''No inserts or deletes yet.
             '''
@@ -68,17 +77,18 @@ def synth(dna_len, ref_writer, writer, n_zmws=100):
     ref_writer.write(">rand%d\n" %dna_len)
     WriteSplit(ref_writer.write, dna)
     loader = Loader(n_zmws)
-    ringer = Ringer()
+    #ringer = Ringer()
     reader = Reader()
-    avg_read_len = 1000
+    avg_read_len = 5000
     total_read_len = 0
     for i, beg, end in loader.Load():
-        writer.write(">m000_000/{0:d}/{1:d}_{2:d}\n".format(i, beg, end))
         #print dna[beg:end]
-        ring = ringer.Ring(i, beg, end)
-        #print ring
+        #ring = ringer.Ring(i, beg, end)
+        ##print ring
         n = random.randrange(avg_read_len * 2)
-        read = reader.Read(ring, n)
+        #read = list(reader.Read(ring, n))
+        read = list(reader.Read(dna[beg:end], n))
+        writer.write(">m000_000/{0:d}/garbage/{1:d}_{2:d}\n".format(i, 0, len(read)))
         writer.write(''.join(read))
         writer.write('\n')
         total_read_len += n
@@ -95,6 +105,6 @@ coverage={coverage:.1f}x
     #reader = PbReader(dna)
 def main():
     with open('cx.ref.fasta', 'w') as ref_writer, open('cx.fasta', 'w') as writer:
-        synth(4600000, ref_writer, writer, n_zmws=120000)
+        synth(4600000, ref_writer, writer, n_zmws=25000)
 if __name__ == "__main__":
     main()
