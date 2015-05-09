@@ -3,10 +3,12 @@ import re, sys, os, fileinput
 CWD = os.path.abspath(os.getcwd())
 
 # For now, DALIGN hard-codes arab2_test.
-re_dir = re.compile(r'\S*\barab2_test\b')
+re_dir = re.compile(r'\S*\barab2\w*\b')
 def mydir(line, cwd):
     '''
     >>> mydir('x /abc/arab2_test/x', '/q')
+    'x /q/x'
+    >>> mydir('x /abc/arab2/x', '/q')
     'x /q/x'
     '''
     return re_dir.sub(cwd, line)
