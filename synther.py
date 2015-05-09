@@ -81,6 +81,7 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
     #ringer = Ringer()
     reader = Reader()
     total_read_len = 0
+    nreads = 0
     for i, beg, end in loader.Load():
         #print dna[beg:end]
         #ring = ringer.Ring(i, beg, end)
@@ -95,7 +96,9 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
         writer.write(''.join(read))
         writer.write('\n')
         total_read_len += len(read)
+        nreads += 1
     coverage = total_read_len / dna_len
+    avg_read_len = total_read_len / nreads
     sys.stderr.write(repr(locals().keys()))
     sys.stderr.write("""
 dna_len={dna_len}
