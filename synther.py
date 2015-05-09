@@ -114,6 +114,6 @@ def main():
         #synth(4600000, ref_writer, writer, n_zmws=25000)
         #synth(4, ref_writer, writer, n_zmws=4, avg_read_len=2)
         #synth(40, ref_writer, writer, n_zmws=2, avg_read_len=500)
-        synth(400, ref_writer, writer, n_zmws=20, avg_read_len=500)
+        synth(40000, ref_writer, writer, n_zmws=400, avg_read_len=500)
 if __name__ == "__main__":
     main()
