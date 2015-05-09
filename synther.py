@@ -28,6 +28,7 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
         ref_writer: reference (source DNA)
         writer: all "reads"
     '''
+    min_read_len = 25 # imposed by DALIGNER
     class DnaCreator(object):
         def Create(self, n):
             return [choice(DNA_BASES) for _ in range(n)]
@@ -84,14 +85,16 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
         #print dna[beg:end]
         #ring = ringer.Ring(i, beg, end)
         ##print ring
-        n = random.randrange(avg_read_len * 2)
+        #n = random.randrange(min_read_len, avg_read_len * 2)
         #read = list(reader.Read(ring, n))
         #read = list(reader.Read(dna[beg:end], n))
         read = dna[beg:end]
+        if len(read) < min_read_len:
+            continue
         writer.write(">m000_000/{0:d}/garbage/{1:d}_{2:d}\n".format(i, 0, len(read)))
         writer.write(''.join(read))
         writer.write('\n')
-        total_read_len += n
+        total_read_len += len(read)
     coverage = total_read_len / dna_len
     sys.stderr.write(repr(locals().keys()))
     sys.stderr.write("""
@@ -106,6 +109,8 @@ coverage={coverage:.1f}x
 def main():
     with open('cx.ref.fasta', 'w') as ref_writer, open('cx.fasta', 'w') as writer:
         #synth(4600000, ref_writer, writer, n_zmws=25000)
-        synth(4, ref_writer, writer, n_zmws=4, avg_read_len=2)
+        #synth(4, ref_writer, writer, n_zmws=4, avg_read_len=2)
+        #synth(40, ref_writer, writer, n_zmws=2, avg_read_len=500)
+        synth(400, ref_writer, writer, n_zmws=20, avg_read_len=500)
 if __name__ == "__main__":
     main()
