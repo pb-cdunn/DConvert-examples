@@ -5,7 +5,7 @@ import subprocess
 import sys
 import time
 
-REPEAT = False
+REPEAT = True
 QSUB_TEMPLATE = ("qsub -S /bin/bash -sync y -V -q production -N dalign.{i} -o $PWD/dalign_cmds/{log} "
                  "-e $PWD/dalign_cmds/{log} -pe smp {nproc} "
                  "-wd $PWD dalign_cmds/{sh}")
