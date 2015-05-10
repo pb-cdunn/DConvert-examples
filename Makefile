@@ -53,8 +53,9 @@ ${DAZZ_DBFILE}: ${CORRECTED_FASTA}
 	${DAZZ_DIR}/DBsplit -a $@
 
 #${MERGED_LAS}: ${DAZZ_DBFILE}
-corrected.1.las: ${DAZZ_DBFILE}
+daligner_cmds.txt: ${DAZZ_DBFILE}
 	${DALIGN_DIR}/HPCdaligner ${DALIGNER_OPTS} $< >| daligner_cmds.txt	
+corrected.1.las: daligner_cmds.txt
 	python mydir_sub.py daligner_cmds.txt
 	mkdir -p dalign_cmds
 	for i in $$(seq 1 `wc -l < daligner_cmds.txt`) ; do sed -n "$$i p" daligner_cmds.txt >| dalign_cmds/dalign.$$i.sh ; done
