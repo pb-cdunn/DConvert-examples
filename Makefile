@@ -65,8 +65,7 @@ ${MERGED_LAS}: corrected.1.las
 	echo rm corrected.*.las
 
 ${TRIMMED_READS_PB}: ${MERGED_LAS} 
-	env | sort
-	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_READS} --min_spanned_coverage 1 --overlaps - > $@
+	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_READS} --min_spanned_coverage 1 --overlaps - > $@ 2> trim_reads.log
 	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_OVERLAPS} --overlaps - --trimmed_reads $@  2> overlap_trimming.log | ${WRITE_TO_OVB} --style ovl > ${MERGED_OVB} 2> write_ovb.log
 
 ${CORRECTED_FASTQ}: ${CORRECTED_FASTA}
