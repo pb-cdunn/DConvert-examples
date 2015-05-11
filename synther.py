@@ -22,7 +22,7 @@ def WriteSplit(write, seq, split=60):
         slice = seq[nfull*split:]
         write(''.join(slice))
         write('\n')
-def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100, avg_read_len=5000):
+def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100):
     '''
     Writer FASTA files:
         ref_writer: reference (source DNA)
@@ -56,15 +56,24 @@ def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100, avg_read_len=5000
             capB = []
             ring = dna[beg:end] + capA + list(complement(reversed(dna[beg:end]))) + capB
             return ring
-    class Reader(object):
+    class Sampler(object):
         def Read(self, seq, upton):
-            '''No inserts or deletes yet.
-            '''
             l = len(seq)
             if upton >= l:  # == b/c randrange(0) fails
                 return seq
             curr = random.randrange(l-upton)
             return seq[curr:curr+upton]
+    class MessyReader(object):
+        erate = .01
+        def Read(self, seq):
+            '''No inserts or deletes yet.
+            (And we under-shoot erate by choice(DNA_BASES).)
+            '''
+            dist = random.uniform
+            choice = random.choice
+            erate = self.erate
+            return [b if dist(0, 1) > erate else choice(DNA_BASES) for b in seq]
+            #return [b for b in seq if dist(0, 1) > erate]
     class RingReader(object):
         def Read(self, ring, n):
             '''No inserts or deletes yet.
@@ -85,7 +94,7 @@ def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100, avg_read_len=5000
     WriteSplit(ref_writer.write, dna)
     loader = Loader(n_zmws)
     #ringer = Ringer()
-    reader = Reader()
+    reader = MessyReader()
     total_read_len = 0
     nreads = 0
     for i, beg, end in loader.Load():
@@ -95,7 +104,8 @@ def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100, avg_read_len=5000
         #n = random.randrange(min_read_len, avg_read_len * 2)
         #read = list(reader.Read(ring, n))
         #read = list(reader.Read(dna[beg:end], n))
-        read = dna[beg:end]
+        #read = dna[beg:end]
+        read = list(reader.Read(dna[beg:end]))
         if len(read) < min_read_len:
             continue
         #writer.write(">m000_000/{0:d}/garbage/{1:d}_{2:d}\n".format(i, 0, len(read)))
@@ -123,6 +133,6 @@ def main():
         #synth(4600000, ref_writer, writer, n_zmws=25000)
         #synth(4, ref_writer, writer, n_zmws=4, avg_read_len=2)
         #synth(40, ref_writer, writer, n_zmws=2, avg_read_len=500)
-        synth(4000000, ref_writer, dna_writer, writer, n_zmws=10000, avg_read_len=500)
+        synth(4000000, ref_writer, dna_writer, writer, n_zmws=14000)
 if __name__ == "__main__":
     main()
