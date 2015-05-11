@@ -92,7 +92,8 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
         read = dna[beg:end]
         if len(read) < min_read_len:
             continue
-        writer.write(">m000_000/{0:d}/garbage/{1:d}_{2:d}\n".format(i, 0, len(read)))
+        #writer.write(">m000_000/{0:d}/garbage/{1:d}_{2:d}\n".format(i, 0, len(read)))
+        writer.write(">m000_000/{0:d}/garbage/{1:d}_{2:d}\n".format(i, beg, end))
         writer.write(''.join(read))
         writer.write('\n')
         total_read_len += len(read)
