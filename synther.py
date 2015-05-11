@@ -33,8 +33,8 @@ def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100):
         def Create(self, n):
             return [choice(DNA_BASES) for _ in range(n)]
     class Loader(object):
-        worst_len = 2000
-        best_len = 4000
+        worst_len = 1000
+        best_len = 12000
         def __init__(self, n_zmws):
             self.n_zmws = n_zmws
         def Load(self):
