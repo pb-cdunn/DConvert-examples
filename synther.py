@@ -48,7 +48,7 @@ def synth(dna_len, ref_writer, dna_writer, writer, n_zmws=100, avg_read_len=5000
                 end = beg + rlen
                 beg = max(0, beg)
                 end = min(end, tlen)
-                if end > beg:
+                if end - beg >= min_read_len:
                     yield (i, beg, end)
     class Ringer(object):
         def Ring(self, i, beg, end):
