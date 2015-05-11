@@ -43,10 +43,13 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
             n_zmws = self.n_zmws
             tlen = len(dna)
             for i in range(self.n_zmws):
-                beg = random.randrange(len(dna))
-                end = beg + random.randrange(worst_len, best_len + 1)
+                rlen = random.randrange(worst_len, best_len + 1)
+                beg = random.randrange(rlen + len(dna)) - rlen
+                end = beg + rlen
+                beg = max(0, beg)
                 end = min(end, tlen)
-                yield (i, beg, end)
+                if end > beg:
+                    yield (i, beg, end)
     class Ringer(object):
         def Ring(self, i, beg, end):
             capA = []
