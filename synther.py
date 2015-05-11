@@ -33,7 +33,7 @@ def synth(dna_len, ref_writer, writer, n_zmws=100, avg_read_len=5000):
         def Create(self, n):
             return [choice(DNA_BASES) for _ in range(n)]
     class Loader(object):
-        worst_len = 1000
+        worst_len = 2000
         best_len = 15000
         def __init__(self, n_zmws):
             self.n_zmws = n_zmws
@@ -115,6 +115,6 @@ def main():
         #synth(4600000, ref_writer, writer, n_zmws=25000)
         #synth(4, ref_writer, writer, n_zmws=4, avg_read_len=2)
         #synth(40, ref_writer, writer, n_zmws=2, avg_read_len=500)
-        synth(40000, ref_writer, writer, n_zmws=400, avg_read_len=500)
+        synth(4000000, ref_writer, writer, n_zmws=10000, avg_read_len=500)
 if __name__ == "__main__":
     main()
