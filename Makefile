@@ -20,6 +20,7 @@ TRIM_OVERLAPS        :=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/trim_overlaps
 WRITE_TO_OVB         :=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/write_to_ovb
 APPLY_TRIMMING_TO_GKP:=${WML} -p ${MP} -m ${MK} ${DCONVERT_DIR}/apply_trimming_to_gkp
 GATEKEEPER           :=${CELERA_DIR}/gatekeeper
+GATEKEEPER:=/lustre/hpcprod/cdunn/repo/gh/DConvert/celera_assembler/wgs-8.1/Linux-amd64/bin/gatekeeper
 
 # This needs stuff for tigStore-adapter.py, which it calls.
 PBUTGCNS_WF          :=${WML} -m ${SMRT} ./pbutgcns_wf.sh
@@ -61,7 +62,7 @@ corrected.1.las: daligner_cmds.txt
 	for i in $$(seq 1 `wc -l < daligner_cmds.txt`) ; do sed -n "$$i p" daligner_cmds.txt >| dalign_cmds/dalign.$$i.sh ; done
 	python ./run_dalign.py dalign_cmds
 ${MERGED_LAS}: corrected.1.las
-	${DALIGN_DIR}/LAmerge $@ corrected.1.las
+	${DALIGN_DIR}/LAmerge $@ corrected.?.las
 	echo rm corrected.*.las
 
 ${TRIMMED_READS_PB}: ${MERGED_LAS} 
@@ -74,6 +75,8 @@ ${CORRECTED_FASTQ}: ${CORRECTED_FASTA}
 $(GKPSTORE): $(CORRECTED_FRG) $(CORRECTED_FASTQ) $(TRIMMED_READS_PB)
 	# This will *not* modify an existing gkpstore.
 	${GATEKEEPER} -o $(GKPSTORE) -T -F $<
+	# IDs are slightly remapped.
+	python mapGk2Zmz.py < gkpstore.fastqUIDmap >| gkpstore.fastqUIDmap2zmw
 	${APPLY_TRIMMING_TO_GKP} --gkp $(GKPSTORE) --trimmed_reads $(TRIMMED_READS_PB)
 
 $(OVERLAPSTORE): $(TRIMMED_READS_PB) $(GKPSTORE)
@@ -123,10 +126,14 @@ corrected.fasta: cx.fasta
 
 ex.out: ${DRAFT_ASSEMBLY}
 	${WML} -m exonerate/2.0.0 fastalength $< > $@
+fastalength: #${DRAFT_ASSEMBLY}
+	${WML} -m exonerate/2.0.0 fastalength ${DRAFT_ASSEMBLY}
 out.report: ${DRAFT_ASSEMBLY}
 	${WML} -m mummer/3.23 dnadiff ${REF} $<
 foo:
 	${WML} -m mummer/3.23 which dnadiff
+check:
+	python check.py from.fasta cx.fasta
 # See *.report
 
 .PHONY: clean

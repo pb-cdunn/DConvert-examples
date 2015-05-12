@@ -22,8 +22,8 @@ def check(iref, ireads):
         bases = ireads.readline() # discard for now
         reads.append([beg, end])
     reads.sort()
-    print reads
-    covered = collections.defaultdict(int)
+    covered = {i:0 for i in range(n)}
+    #collections.defaultdict(int)
     for beg, end in reads:
         #print beg, end, covered[beg]
         for i in range(beg, end):
