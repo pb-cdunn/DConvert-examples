@@ -89,7 +89,7 @@ $(FRG_CORR): | $(OVERLAPSTORE)
 	python ./make_frg_correct.py `$(GKPFRAGS) $(GKPSTORE)` > $@_cmds.txt
 	mkdir -p $@_dir
 	for i in $$(seq 1 `wc -l < $@_cmds.txt`) ; do sed -n "$$i p" $@_cmds.txt > $@_dir/$@.$$i.sh ; done
-	for i in $@_dir/*.sh ; do qsub -S /bin/bash -sync y -V -q production -N $@ -o $$PWD/$$i.log -e $$PWD/$$i.log -pe smp 3 $$i & sleep 1 ; done ; wait
+	for i in $@_dir/*.sh ; do $$i ; done
 	ls $@_dir/*.WORKING > $@.list
 	$(CELERA_DIR)/cat-corrects -L $@.list -o $@
 
@@ -97,7 +97,7 @@ $(OLAP_ERATES): $(FRG_CORR)
 	python ./make_olap_correct.py `$(GKPFRAGS) $(GKPSTORE)` > $@_cmds.txt
 	mkdir -p $@_dir
 	for i in $$(seq 1 `wc -l < $@_cmds.txt`) ; do sed -n "$$i p" $@_cmds.txt > $@_dir/$@.$$i.sh ; done
-	for i in $@_dir/*.sh ; do qsub -S /bin/bash -sync y -V -q production -N $@ -o $$PWD/$$i.log -e $$PWD/$$i.log -pe smp 3 $$i & sleep 1 ; done ; wait
+	for i in $@_dir/*.sh ; do $$i ; done
 	ls $@_dir/*.WORKING > $@.list
 	$(CELERA_DIR)/cat-erates -L $@.list -o $@
 
