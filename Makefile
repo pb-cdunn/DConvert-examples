@@ -60,7 +60,7 @@ corrected.1.las: daligner_cmds.txt
 	python mydir_sub.py daligner_cmds.txt
 	mkdir -p dalign_cmds
 	for i in $$(seq 1 `wc -l < daligner_cmds.txt`) ; do sed -n "$$i p" daligner_cmds.txt >| dalign_cmds/dalign.$$i.sh ; done
-	python ./run_dalign.py dalign_cmds
+	PATH=${DALIGN_DIR}:$${PATH} python ./run_dalign.py dalign_cmds
 ${MERGED_LAS}: corrected.1.las
 	${DALIGN_DIR}/LAmerge $@ corrected.?.las
 	echo rm corrected.*.las
