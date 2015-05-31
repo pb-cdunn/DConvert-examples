@@ -65,22 +65,29 @@ ${MERGED_LAS}: corrected.1.las
 	${DALIGN_DIR}/LAmerge $@ corrected.?.las
 	echo rm corrected.*.las
 
-${TRIMMED_READS_PB}: ${MERGED_LAS} 
-	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_READS} --min_spanned_coverage 1 --overlaps - > $@ 2> trim_reads.log
-	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} | ${TRIM_OVERLAPS} --overlaps - --trimmed_reads $@  2> overlap_trimming.log | ${WRITE_TO_OVB} --map-dazz dazz-idx2zmw --map-gkp gkpstore.fastqUIDmap2zmw --style ovl --out ${MERGED_OVB} 2> write_ovb.log
+dazz-idx2zmw: ${DAZZ_DBFILE}
+	${DAZZ_DIR}/DBshow -m ${DAZZ_DBFILE} >| dazz-idx2zmw
+
+${TRIMMED_READS_PB}: ${MERGED_LAS} dazz-idx2zmw gkpstore.fastqUIDmap2zmw
+	${READ_FROM_LAS} --las $< --db ${DAZZ_DBFILE} --out overlaps.pb
+	${TRIM_READS} --min_spanned_coverage 1 --overlaps overlaps.pb --out $@ 2> trim_reads.log
+	${TRIM_OVERLAPS} --overlaps overlaps.pb --trimmed_reads $@ --out trimmed_overlaps.pb 2> overlap_trimming.log 
+	${WRITE_TO_OVB} --map-dazz dazz-idx2zmw --map-gkp gkpstore.fastqUIDmap2zmw --style ovl --overlaps trimmed_overlaps.pb --out ${MERGED_OVB} 2> write_ovb.log
 
 ${CORRECTED_FASTQ}: ${CORRECTED_FASTA}
 	${WML} -m ${SMRT} python ./fake_fastq.py $< $@
 
-$(GKPSTORE): $(CORRECTED_FRG) $(CORRECTED_FASTQ) $(TRIMMED_READS_PB)
+gkpstore.fastqUIDmap2zmw: ${CORRECTED_FRG} ${CORRECTED_FASTQ}
 	# This will *not* modify an existing gkpstore.
-	${GATEKEEPER} -o $(GKPSTORE) -T -F $<
+	${GATEKEEPER} -o ${GKPSTORE} -T -F ${CORRECTED_FRG}
 	# IDs are slightly remapped.
 	python mapGk2Zmz.py < gkpstore.fastqUIDmap >| gkpstore.fastqUIDmap2zmw
-	${DAZZ_DIR}/DBshow -m ${DAZZ_DBFILE} >| dazz-idx2zmw
-	${APPLY_TRIMMING_TO_GKP} --map-dazz dazz-idx2zmw --map-gkp gkpstore.fastqUIDmap2zmw --gkp $(GKPSTORE) --trimmed_reads $(TRIMMED_READS_PB)
 
-$(OVERLAPSTORE): $(TRIMMED_READS_PB) $(GKPSTORE)
+$(GKPSTORE).done: gkpstore.fastqUIDmap2zmw ${TRIMMED_READS_PB}
+	${APPLY_TRIMMING_TO_GKP} --map-dazz dazz-idx2zmw --map-gkp gkpstore.fastqUIDmap2zmw --gkp $(GKPSTORE) --trimmed_reads ${TRIMMED_READS_PB}
+	touch ${GKPSTORE}.done
+
+$(OVERLAPSTORE): $(TRIMMED_READS_PB) ${GKPSTORE}.done
 	ls $(MERGED_OVB) > ovl.list
 	$(CELERA_DIR)/overlapStoreBuild -o $@.BUILDING -g $(GKPSTORE) -M 1021 -L ovl.list
 	mv $@.BUILDING $@
